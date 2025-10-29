@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英雄联盟五人组队抽选器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #0c0c2e 0%, #1a1a4a 50%, #2d2d6e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230c0c2e"/><path d="M0 0L100 100M100 0L0 100" stroke="%231a1a4a" stroke-width="1"/></svg>');
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(15, 25, 55, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 3px solid #4a7bff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(74, 123, 255, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+            color: #4a7bff;
+            text-shadow: 0 0 10px rgba(74, 123, 255, 0.7);
+            background: linear-gradient(45deg, #4a7bff, #8a2be2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 2em;
+            color: #a0a0ff;
+        }
+        
+        .lol-logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, #005aff, #8a2be2);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 5px solid #ffcc00;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.5);
+            font-size: 3em;
+        }
+        
+        .result-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .player-card {
+            width: 150px;
+            height: 180px;
+            background: linear-gradient(135deg, #1e2a5e, #2d3b7a);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #4a7bff;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .player-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #4a7bff, #8a2be2);
+        }
+        
+        .player-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(74, 123, 255, 0.4);
+        }
+        
+        .player-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(45deg, #4a7bff, #8a2be2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            border: 3px solid #ffcc00;
+        }
+        
+        .player-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(74, 123, 255, 0.7);
+        }
+        
+        .player-role {
+            font-size: 0.9em;
+            color: #a0a0ff;
+            margin-top: 5px;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4a7bff, #8a2be2);
+            color: white;
+            border: none;
+            padding: 16px 35px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(74, 123, 255, 0.4);
+            font-weight: bold;
+            border: 2px solid #ffcc00;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #8a2be2, #4a7bff);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(74, 123, 255, 0.6);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .roles-container {
+            margin-top: 30px;
+            text-align: left;
+            background: rgba(30, 42, 94, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #4a7bff;
+        }
+        
+        .roles-container h3 {
+            margin-bottom: 15px;
+            color: #ffcc00;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .roles-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .role-tag {
+            background: linear-gradient(45deg, #4a7bff, #8a2be2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 1em;
+            border: 1px solid #ffcc00;
+        }
+        
+        .instructions {
+            margin-top: 25px;
+            font-size: 1em;
+            color: #a0a0ff;
+            text-align: left;
+            background: rgba(30, 42, 94, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #4a7bff;
+        }
+        
+        .rolling {
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { opacity: 0.7; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .player-card {
+                width: 130px;
+                height: 160px;
+            }
+            
+            button {
+                padding: 14px 25px;
+                font-size: 1.2em;
+            }
+            
+            .lol-logo {
+                width: 80px;
+                height: 80px;
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="lol-logo">⚔️</div>
+        <h1>英雄联盟五人组队抽选器</h1>
+        <div class="subtitle">今晚打英雄联盟的五个人是：</div>
+        
+        <div class="result-container" id="resultContainer">
+            <!-- 玩家卡片将通过JavaScript动态生成 -->
+        </div>
+        
+        <div class="button-group">
+            <button id="drawBtn" onclick="drawTeam()">抽取队伍</button>
+            <button id="resetBtn" onclick="resetTeam()">重新抽取</button>
+        </div>
+        
+        <div class="roles-container">
+            <h3>🏆 可选游戏位置</h3>
+            <div class="roles-list">
+                <div class="role-tag">上单</div>
+                <div class="role-tag">打野</div>
+                <div class="role-tag">中单</div>
+                <div class="role-tag">ADC</div>
+                <div class="role-tag">辅助</div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <p><strong>🎮 使用说明：</strong></p>
+            <p>1. 点击"抽取队伍"按钮随机选择5名玩家</p>
+            <p>2. 同一玩家可能被重复抽中</p>
+            <p>3. 点击"重新抽取"可以重新选择队伍</p>
+            <p>4. 每位玩家会随机分配一个游戏位置</p>
+        </div>
+    </div>
+
+    <script>
+        // 玩家名单
+        const players = ["恩哥", "奈子", "二三", "WM", "李斌", "牛牛", "小析木子", "张宁"];
+        
+        // 游戏位置
+        const roles = ["上单", "打野", "中单", "ADC", "辅助"];
+        
+        // 玩家头像图标
+        const avatars = ["👨‍💼", "👩‍💼", "👨‍🎓", "👩‍🎓", "👨‍🔧", "👩‍🔧", "👨‍🚀", "👩‍🚀"];
+        
+        // 当前队伍
+        let currentTeam = [];
+        
+        // 初始化显示
+        function initDisplay() {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = '';
+            
+            // 创建5个空的玩家卡片
+            for (let i = 0; i < 5; i++) {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                playerCard.innerHTML = `
+                    <div class="player-avatar">?</div>
+                    <div class="player-name">待抽取</div>
+                    <div class="player-role">位置待定</div>
+                `;
+                container.appendChild(playerCard);
+            }
+        }
+        
+        // 抽取队伍
+        function drawTeam() {
+            const container = document.getElementById('resultContainer');
+            const drawBtn = document.getElementById('drawBtn');
+            
+            // 禁用按钮防止重复点击
+            drawBtn.disabled = true;
+            drawBtn.innerText = "抽取中...";
+            
+            // 清空当前队伍
+            currentTeam = [];
+            
+            // 添加滚动效果
+            container.classList.add('rolling');
+            
+            // 模拟抽取过程
+            let rollCount = 0;
+            const rollInterval = setInterval(() => {
+                // 临时显示随机玩家
+                const tempTeam = [];
+                for (let i = 0; i < 5; i++) {
+                    const randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    const randomRole = roles[Math.floor(Math.random() * roles.length)];
+                    tempTeam.push({ name: randomPlayer, role: randomRole });
+                }
+                
+                // 更新显示
+                updateTeamDisplay(tempTeam);
+                
+                rollCount++;
+                if (rollCount > 10) { // 滚动10次后停止
+                    clearInterval(rollInterval);
+                    
+                    // 生成最终队伍
+                    for (let i = 0; i < 5; i++) {
+                        const randomPlayer = players[Math.floor(Math.random() * players.length)];
+                        const randomRole = roles[Math.floor(Math.random() * roles.length)];
+                        currentTeam.push({ name: randomPlayer, role: randomRole });
+                    }
+                    
+                    // 更新最终显示
+                    updateTeamDisplay(currentTeam);
+                    
+                    // 移除滚动效果
+                    container.classList.remove('rolling');
+                    
+                    // 恢复按钮
+                    drawBtn.disabled = false;
+                    drawBtn.innerText = "抽取队伍";
+                }
+            }, 150);
+        }
+        
+        // 更新队伍显示
+        function updateTeamDisplay(team) {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = '';
+            
+            team.forEach((player, index) => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                
+                // 为每个玩家分配一个固定的头像
+                const avatarIndex = players.indexOf(player.name) % avatars.length;
+                
+                playerCard.innerHTML = `
+                    <div class="player-avatar">${avatars[avatarIndex]}</div>
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-role">${player.role}</div>
+                `;
+                container.appendChild(playerCard);
+            });
+        }
+        
+        // 重置队伍
+        function resetTeam() {
+            initDisplay();
+            currentTeam = [];
+        }
+        
+        // 初始化
+        window.onload = function() {
+            initDisplay();
+        };
+    </script>
+</body>
+</html>
